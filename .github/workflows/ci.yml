@@ -13,8 +13,16 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Install Dependencies
+        working-directory: services/user-service
+        run: npm ci
+
+      - name: Run Unit Tests
+        working-directory: services/user-service
+        run: npm test
