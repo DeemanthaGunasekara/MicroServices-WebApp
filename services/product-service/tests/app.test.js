@@ -15,14 +15,20 @@ describe('Product Service - Products API', () => {
     const response = await request(app).get('/api/v1/products');
 
     expect(response.statusCode).toBe(200);
-    
     expect(Array.isArray(response.body)).toBe(true);
-    
     expect(response.body.length).toBeGreaterThanOrEqual(3);
-    
     expect(response.body[0]).toMatchObject({
       id: '101',
       name: 'Laptop Pro 16'
     });
+  });
+});
+
+describe('Product Service - Observability', () => {
+  it('GET /metrics should expose Prometheus metrics format', async () => {
+    const response = await request(app).get('/metrics');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toContain('process_cpu_user_seconds_total');
   });
 });
