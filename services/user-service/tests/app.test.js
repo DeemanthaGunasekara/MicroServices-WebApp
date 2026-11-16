@@ -13,17 +13,23 @@ describe('User Service - Health Probe', () => {
 describe('User Service - Users API', () => {
   it('GET /api/v1/users should return a list of users', async () => {
     const response = await request(app).get('/api/v1/users');
-    
+
     expect(response.statusCode).toBe(200);
-    
     expect(Array.isArray(response.body)).toBe(true);
-    
     expect(response.body.length).toBeGreaterThanOrEqual(2);
-    
     expect(response.body[0]).toMatchObject({
       id: '1',
       name: 'Alice Smith',
       email: 'alice@example.com'
     });
+  });
+});
+
+describe('User Service - Observability', () => {
+  it('GET /metrics should expose Prometheus metrics format', async () => {
+    const response = await request(app).get('/metrics');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toContain('process_cpu_user_seconds_total');
   });
 });
