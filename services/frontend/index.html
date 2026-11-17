@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud-Native Microservices Store</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1>🚀 Cloud-Native Store</h1>
+      <p class="subtitle">Live Kubernetes & Microservices Dashboard</p>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <!-- User Service Section -->
+    <section class="section">
+      <h2 class="section-title">👤 Registered Users (User Service)</h2>
+      <div id="users-loading">Loading users from User Service...</div>
+      <div id="users-list" class="grid"></div>
+    </section>
+
+    <!-- Product Service Section -->
+    <section class="section">
+      <h2 class="section-title">📦 Product Catalog (Product Service)</h2>
+      <div id="products-loading">Loading catalog from Product Service...</div>
+      <div id="products-list" class="grid"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
