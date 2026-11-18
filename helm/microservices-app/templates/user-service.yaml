@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  labels:
+    app: user-service
+    {{- include "microservices-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.userService.replicaCount }}
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: "{{ .Values.userService.image.repository }}:{{ .Values.userService.image.tag }}"
+          imagePullPolicy: {{ .Values.userService.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.userService.service.targetPort }}
+          env:
+            - name: PORT
+              value: "{{ .Values.userService.service.targetPort }}"
+          resources:
+            {{- toYaml .Values.userService.resources | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.userService.probes.path }}
+              port: {{ .Values.userService.probes.port }}
+            initialDelaySeconds: {{ .Values.userService.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.userService.probes.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.userService.probes.path }}
+              port: {{ .Values.userService.probes.port }}
+            initialDelaySeconds: {{ .Values.userService.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.userService.probes.periodSeconds }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  labels:
+    app: user-service
+    {{- include "microservices-app.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.userService.service.type }}
+  ports:
+    - port: {{ .Values.userService.service.port }}
+      targetPort: {{ .Values.userService.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    app: user-service
