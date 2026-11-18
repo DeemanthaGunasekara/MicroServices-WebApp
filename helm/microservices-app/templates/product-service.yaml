@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+  labels:
+    app: product-service
+    {{- include "microservices-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.productService.replicaCount }}
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      containers:
+        - name: product-service
+          image: "{{ .Values.productService.image.repository }}:{{ .Values.productService.image.tag }}"
+          imagePullPolicy: {{ .Values.productService.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.productService.service.targetPort }}
+          env:
+            - name: PORT
+              value: "{{ .Values.productService.service.targetPort }}"
+          resources:
+            {{- toYaml .Values.productService.resources | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.productService.probes.path }}
+              port: {{ .Values.productService.probes.port }}
+            initialDelaySeconds: {{ .Values.productService.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.productService.probes.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.productService.probes.path }}
+              port: {{ .Values.productService.probes.port }}
+            initialDelaySeconds: {{ .Values.productService.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.productService.probes.periodSeconds }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+  labels:
+    app: product-service
+    {{- include "microservices-app.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.productService.service.type }}
+  ports:
+    - port: {{ .Values.productService.service.port }}
+      targetPort: {{ .Values.productService.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    app: product-service
