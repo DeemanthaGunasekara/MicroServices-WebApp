@@ -10,6 +10,9 @@ permissions:
   contents: read
   packages: write
 
+env:
+  OWNER_LC: ''
+
 jobs:
   build-and-push-user-service:
     name: Build & Push User Service
