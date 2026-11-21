@@ -28,6 +28,12 @@ const signupForm = document.getElementById('signup-form');
 const authFeedback = document.getElementById('auth-feedback');
 const signupSubmitBtn = document.getElementById('signup-submit-btn');
 
+// DB View Modal Elements
+const dbModal = document.getElementById('db-modal');
+const openDbBtn = document.getElementById('open-db-btn');
+const closeDbBtn = document.getElementById('close-db-btn');
+const dbUsersBody = document.getElementById('db-users-body');
+
 /**
  * Fetch products from the microservice catalog endpoint
  * Gracefully falls back to direct live DummyJSON feed if accessed directly
@@ -190,6 +196,50 @@ function renderErrorState(message) {
       <p>${message}</p>
     </div>
   `;
+}
+
+/**
+ * DB Table Modal Handlers
+ */
+if (openDbBtn) {
+  openDbBtn.addEventListener('click', async () => {
+    dbModal.style.display = 'flex';
+    dbUsersBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1.5rem;">Connecting to PostgreSQL...</td></tr>';
+    try {
+      const res = await fetch('/api/v1/users');
+      const data = await res.json();
+      const users = data.data || [];
+      if (users.length === 0) {
+        dbUsersBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1.5rem;">No registered users found in PostgreSQL.</td></tr>';
+        return;
+      }
+      dbUsersBody.innerHTML = users.map(u => `
+        <tr>
+          <td><strong>#${u.id}</strong></td>
+          <td>${u.name}</td>
+          <td><code>${u.email}</code></td>
+          <td><span class="product-badge" style="position:static;">${u.role || 'Customer'}</span></td>
+          <td>${new Date(u.created_at).toLocaleString()}</td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      dbUsersBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:1.5rem; color:#c00;">Error fetching from PostgreSQL: ${err.message}</td></tr>`;
+    }
+  });
+}
+
+if (closeDbBtn) {
+  closeDbBtn.addEventListener('click', () => {
+    dbModal.style.display = 'none';
+  });
+}
+
+if (dbModal) {
+  dbModal.addEventListener('click', (e) => {
+    if (e.target === dbModal) {
+      dbModal.style.display = 'none';
+    }
+  });
 }
 
 /**

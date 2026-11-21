@@ -19,6 +19,7 @@
       </div>
       <div class="nav-links">
         <a href="#catalog" class="nav-link active">Catalog</a>
+        <button class="nav-db-btn" id="open-db-btn">👥 View DB Users</button>
         <button class="nav-auth-btn" id="open-auth-btn">👤 Sign Up</button>
         <button class="cart-btn" aria-label="Cart">
           <span>🛒 Cart</span>
@@ -63,7 +64,35 @@
     </section>
   </main>
 
-    <!-- Sign Up / User Authentication Modal -->
+    <!-- PostgreSQL Database Users Modal -->
+  <div class="modal-overlay" id="db-modal" style="display: none;">
+    <div class="modal-card" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🐘 PostgreSQL Table: users_db.users</h3>
+        <button class="modal-close-btn" id="close-db-btn">✕</button>
+      </div>
+      <p class="modal-subtitle">Live records queried directly from the PostgreSQL database container.</p>
+      
+      <div style="overflow-x: auto; margin-top: 1rem;">
+        <table class="db-table" id="db-users-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Created At</th>
+            </tr>
+          </thead>
+          <tbody id="db-users-body">
+            <tr><td colspan="5" style="text-align:center; padding:1.5rem;">Loading from PostgreSQL...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sign Up / User Authentication Modal -->
   <div class="modal-overlay" id="auth-modal" style="display: none;">
     <div class="modal-card">
       <div class="modal-header">
