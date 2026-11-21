@@ -37,7 +37,7 @@ async function fetchProductCatalog() {
     }
 
     const data = await response.json();
-    state.products = Array.isArray(data) ? data : (data.products || []);
+    state.products = Array.isArray(data) ? data : (data.data || data.products || []);
     state.filteredProducts = [...state.products];
 
     setupCategoryFilters();
