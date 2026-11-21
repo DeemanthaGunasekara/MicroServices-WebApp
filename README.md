@@ -62,17 +62,7 @@ flowchart TD
 
 ---
 
-## 🎨 Interactive Storefront & Figma Design
 
-The storefront is designed from an approved, user-tested prototype:
-* **Figma Prototype:** [View Interactive Figma Design](https://www.figma.com/design/kRuLq69u2qHeGSwwy1kitA)
-* **Warm Minimalist Palette:** Built with clean CSS custom properties (`--primary-accent: #c85a32`, warm sand backgrounds, elevated card surfaces).
-* **100+ Live Marketplace Feed:** Dynamic multi-category catalog across smartphones, laptops, electronics, automotive, watches, and home essentials.
-* **Instant Client Filtering:** Zero-latency category pill selection and real-time title/description keyword search.
-* **In-Browser PostgreSQL Registration:** Interactive Sign-Up modal writing bcrypt-hashed user credentials directly to PostgreSQL.
-* **Live Database Table Viewer:** Built-in modal viewer to inspect live PostgreSQL `users_db.users` records.
-
----
 
 ## 🚀 Quickstart Options
 
