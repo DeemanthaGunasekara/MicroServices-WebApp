@@ -1,6 +1,6 @@
 # 🚀 Cloud-Native Microservices Web Application & CI/CD Pipeline
 
-A modern, enterprise-grade cloud-native microservices application built with **Node.js/Express**, containerized with **Docker**, orchestrated locally via **Docker Compose**, deployed on **Kubernetes** using **Helm**, monitored with **Prometheus & Grafana**, and automated end-to-end with **GitHub Actions CI/CD** publishing to **GitHub Container Registry (GHCR)**.
+A modern, enterprise-grade cloud-native microservices application built with **Node.js/Express** and **PostgreSQL**, containerized with **Docker**, orchestrated locally via **Docker Compose**, deployed on **Kubernetes** using **Helm**, monitored with **Prometheus & Grafana**, and automated end-to-end with **GitHub Actions CI/CD** publishing to **GitHub Container Registry (GHCR)**.
 
 ---
 
@@ -8,20 +8,24 @@ A modern, enterprise-grade cloud-native microservices application built with **N
 
 ```mermaid
 flowchart TD
-    subgraph Client["Public Ingress (Port 80)"]
+    subgraph Client["Public Access (Port 80 / 8080)"]
         Browser["🌐 Web Browser"]
     end
 
     subgraph Kubernetes["Kubernetes Cluster / Local Orchestration"]
-        Ingress["🚦 NGINX Ingress Controller\n(http://localhost)"]
+        Ingress["🚦 NGINX Reverse Proxy & Ingress\n(http://localhost:8080)"]
 
         subgraph FrontendGroup["Frontend Tier"]
-            Frontend["💻 Web Dashboard\n(NGINX Reverse Proxy - Port 80)"]
+            Frontend["🎨 Storefront Dashboard\n(HTML5 / CSS3 / Vanilla JS - Port 80)"]
         end
 
         subgraph BackendGroup["Backend Microservices Tier"]
             UserService["👤 User Service\n(Node.js / Express - Port 3000)"]
             ProductService["📦 Product Service\n(Node.js / Express - Port 3001)"]
+        end
+
+        subgraph DatabaseGroup["Persistence Tier"]
+            Postgres["🐘 PostgreSQL Database\n(users_db / products_db - Port 5432)"]
         end
 
         subgraph MonitoringGroup["Observability & Metrics Tier"]
@@ -32,12 +36,12 @@ flowchart TD
 
     Browser -->|HTTP Requests| Ingress
     Ingress -->|Path: / | Frontend
-    Ingress -->|Path: /api/v1/users| UserService
+    Ingress -->|Path: /api/v1/auth & /api/v1/users| UserService
     Ingress -->|Path: /api/v1/products| ProductService
 
-    Frontend -.->|API Call: /api/v1/users| Ingress
-    Frontend -.->|API Call: /api/v1/products| Ingress
+    Frontend -.->|Client API Calls| Ingress
 
+    UserService -->|Bcrypt Hashed Users| Postgres
     Prometheus -->|Scrapes Metrics| UserService
     Prometheus -->|Scrapes Metrics| ProductService
     Grafana -->|Queries Metrics| Prometheus
@@ -49,11 +53,24 @@ flowchart TD
 
 | Component | Technology | Internal Port | External Route / Port | Purpose |
 | :--- | :--- | :--- | :--- | :--- |
-| **Frontend** | HTML5, CSS3, Vanilla JS, NGINX Alpine | `80` | `http://localhost/` (Ingress) or `:8080` (Compose) | Responsive Dashboard displaying registered users & products |
-| **User Service** | Node.js, Express, Jest, Supertest | `3000` | `http://localhost/api/v1/users` | REST API managing registered users and account data |
-| **Product Service** | Node.js, Express, Jest, Supertest | `3001` | `http://localhost/api/v1/products` | REST API managing cloud product catalog and pricing |
-| **Prometheus** | Prometheus v2.51.0 | `9090` | `http://localhost:9090` | Scrapes cloud-native `/metrics` targets every 5 seconds |
-| **Grafana** | Grafana 10.4.0 | `3000` | `http://localhost:3002` | Real-time observability dashboard for runtime monitoring |
+| **Frontend** | HTML5, CSS3, Vanilla JS, NGINX Alpine | `80` | `http://localhost:8080` | Warm minimalist storefront with real-time search, filters, & cart |
+| **User Service** | Node.js, Express, bcryptjs, JWT | `3000` | `http://localhost:3000` | Manages authentication, registration, and user data |
+| **Product Service** | Node.js, Express, Fetch API | `3001` | `http://localhost:3001` | Streams 100+ live multi-department marketplace catalog with caching |
+| **PostgreSQL** | PostgreSQL 16 Alpine | `5432` | `localhost:5432` | Relational database with persistent storage volume (`postgres_data`) |
+| **Prometheus** | Prometheus v2.51.0 | `9090` | `http://localhost:9090` | Cloud-native metric scraper collecting runtime performance data |
+| **Grafana** | Grafana 10.4.0 | `3000` | `http://localhost:3002` | Real-time visualization dashboard (Login: `admin` / `admin`) |
+
+---
+
+## 🎨 Interactive Storefront & Figma Design
+
+The storefront is designed from an approved, user-tested prototype:
+* **Figma Prototype:** [View Interactive Figma Design](https://www.figma.com/design/kRuLq69u2qHeGSwwy1kitA)
+* **Warm Minimalist Palette:** Built with clean CSS custom properties (`--primary-accent: #c85a32`, warm sand backgrounds, elevated card surfaces).
+* **100+ Live Marketplace Feed:** Dynamic multi-category catalog across smartphones, laptops, electronics, automotive, watches, and home essentials.
+* **Instant Client Filtering:** Zero-latency category pill selection and real-time title/description keyword search.
+* **In-Browser PostgreSQL Registration:** Interactive Sign-Up modal writing bcrypt-hashed user credentials directly to PostgreSQL.
+* **Live Database Table Viewer:** Built-in modal viewer to inspect live PostgreSQL `users_db.users` records.
 
 ---
 
@@ -61,26 +78,27 @@ flowchart TD
 
 ### Option 1: Run with Docker Compose (Local Development)
 
-To start the entire microservices stack along with Prometheus and Grafana in one command:
+Start the entire 6-container microservices stack in one command:
 
 ```bash
 docker compose up -d --build
 ```
 
-* **Frontend Dashboard:** [http://localhost:8080](http://localhost:8080)
-* **User Service Health:** [http://localhost:3000/healthz](http://localhost:3000/healthz)
-* **Product Service Health:** [http://localhost:3001/healthz](http://localhost:3001/healthz)
+#### Access Endpoints:
+* **Storefront Dashboard:** [http://localhost:8080](http://localhost:8080)
+* **User Service API:** [http://localhost:3000/api/v1/users](http://localhost:3000/api/v1/users)
+* **Product Service API:** [http://localhost:3001/api/v1/products](http://localhost:3001/api/v1/products)
 * **Prometheus Targets:** [http://localhost:9090/targets](http://localhost:9090/targets)
-* **Grafana Dashboard:** [http://localhost:3002](http://localhost:3002) (Login: `admin` / `admin`)
+* **Grafana Dashboards:** [http://localhost:3002](http://localhost:3002) *(Login: `admin` / `admin`)*
 
-To shut down:
+To stop all containers:
 ```bash
 docker compose down
 ```
 
 ---
 
-### Option 2: Deploy with Helm (Production Kubernetes)
+### Option 2: Deploy with Helm (Kubernetes)
 
 Package and deploy all microservices and Ingress using Helm:
 
@@ -91,7 +109,7 @@ helm upgrade --install microservices-app ./helm/microservices-app \
   --create-namespace
 ```
 
-To view deployed resources:
+Inspect deployed resources:
 ```bash
 kubectl get all,ingress -n microservices-app
 ```
@@ -109,7 +127,7 @@ helm uninstall microservices-app -n microservices-app
 # 1. Create Namespace
 kubectl apply -f k8s/namespace.yaml
 
-# 2. Deploy Services, Deployments, and Ingress
+# 2. Deploy Services, Deployments, PVCs, and Ingress
 kubectl apply -f k8s/
 ```
 
@@ -117,6 +135,17 @@ Access the application via NGINX Ingress at:
 * **Dashboard:** [http://localhost/](http://localhost/)
 * **Users API:** [http://localhost/api/v1/users](http://localhost/api/v1/users)
 * **Products API:** [http://localhost/api/v1/products](http://localhost/api/v1/products)
+
+---
+
+## 🔒 Secret Management & DevOps Hygiene
+
+This project enforces strict cloud-native secret handling standards:
+
+* **No Hardcoded Secrets:** `.env` and credential files are strictly excluded via `.gitignore`.
+* **Sanitized Template (`.env.example`):** The repository provides a clean `.env.example` documenting all configuration keys without exposing real values.
+* **CI/CD Injection:** GitHub Actions workflows dynamically inject secrets at build/test time using `${{ secrets.VARIABLE_NAME }}`.
+* **Kubernetes Secrets:** In Kubernetes, credentials are decoupled from application pods and mounted securely via `Secret` and `ConfigMap` resources.
 
 ---
 
@@ -138,7 +167,7 @@ This repository uses automated **GitHub Actions** workflows:
 
 ---
 
-## 🔒 Security Best Practices Implemented
+## 🛡️ Security Best Practices Implemented
 
 * **Unprivileged Non-Root Containers:** All Node microservices run under `USER node` and NGINX runs on Alpine to minimize attack surfaces.
 * **Kubernetes Resource Governance:** Every pod has strict CPU and Memory `requests` and `limits` to prevent noisy-neighbor starvation.
