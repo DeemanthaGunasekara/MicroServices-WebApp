@@ -3,32 +3,101 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cloud-Native Microservices Store</title>
+  <title>ShopMate — Modern E-Commerce Store</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header class="header">
-    <div class="container">
-      <h1>🚀 Cloud-Native Store</h1>
-      <p class="subtitle">Live Kubernetes & Microservices Dashboard</p>
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <span class="brand-icon">🛍️</span>
+        <span class="brand-name">ShopMate</span>
+      </div>
+      <div class="nav-links">
+        <a href="#catalog" class="nav-link active">Catalog</a>
+        <button class="nav-auth-btn" id="open-auth-btn">👤 Sign Up</button>
+        <button class="cart-btn" aria-label="Cart">
+          <span>🛒 Cart</span>
+          <span class="cart-badge" id="cart-count">0</span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <main class="container main-content">
-    <!-- User Service Section -->
-    <section class="section">
-      <h2 class="section-title">👤 Registered Users (User Service)</h2>
-      <div id="users-loading">Loading users from User Service...</div>
-      <div id="users-list" class="grid"></div>
+  <!-- Hero Banner -->
+  <section class="hero-banner">
+    <div class="hero-content">
+      <span class="hero-tag">New Season Collection 2026</span>
+      <h1 class="hero-title">Curated Products for Modern Living</h1>
+      <p class="hero-subtitle">Explore premium electronics, fashion, and lifestyle essentials with fast worldwide delivery.</p>
+      <a href="#catalog" class="hero-cta-btn">Explore Catalog ↓</a>
+    </div>
+  </section>
+
+  <!-- Main Storefront Section -->
+  <main class="main-container" id="catalog">
+    <!-- Search & Filter Controls -->
+    <section class="controls-section">
+      <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search across 30+ live products..." autocomplete="off">
+      </div>
+      <div class="categories-wrapper" id="categories-bar">
+        <button class="cat-pill active" data-category="all">All Products</button>
+        <!-- Dynamic category pills will be inserted here -->
+      </div>
     </section>
 
-    <!-- Product Service Section -->
-    <section class="section">
-      <h2 class="section-title">📦 Product Catalog (Product Service)</h2>
-      <div id="products-loading">Loading catalog from Product Service...</div>
-      <div id="products-list" class="grid"></div>
+    <!-- Product Count & Loading/Error State -->
+    <div class="status-bar">
+      <span id="product-count-label" class="product-count-label">Loading products...</span>
+    </div>
+
+    <!-- Product Grid -->
+    <section id="products-grid" class="products-grid">
+      <!-- Product cards will be rendered dynamically by app.js -->
     </section>
   </main>
+
+    <!-- Sign Up / User Authentication Modal -->
+  <div class="modal-overlay" id="auth-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Create Account</h3>
+        <button class="modal-close-btn" id="close-auth-btn">✕</button>
+      </div>
+      <p class="modal-subtitle">Register to save orders. Stored directly in PostgreSQL.</p>
+      
+      <form id="signup-form" class="auth-form">
+        <div class="form-group">
+          <label for="user-name">Full Name</label>
+          <input type="text" id="user-name" placeholder="e.g. Alex Morgan" required autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="user-email">Email Address</label>
+          <input type="email" id="user-email" placeholder="e.g. alex@example.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="user-password">Password</label>
+          <input type="password" id="user-password" placeholder="At least 6 characters" minlength="6" required autocomplete="new-password">
+        </div>
+        <button type="submit" class="auth-submit-btn" id="signup-submit-btn">Create Account</button>
+      </form>
+      
+      <div id="auth-feedback" class="auth-feedback" style="display: none;"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <p>© 2026 ShopMate Microservices Platform. Built with Cloud-Native Microservices.</p>
+    </div>
+  </footer>
 
   <script src="app.js"></script>
 </body>

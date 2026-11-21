@@ -75,11 +75,11 @@ async function fetchECommerceProducts() {
     return cachedProducts;
   }
 
-  try {
+    try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-    const response = await fetch('https://dummyjson.com/products?limit=30', {
+    const response = await fetch('https://dummyjson.com/products?limit=100', {
       signal: controller.signal
     });
     clearTimeout(timeoutId);
