@@ -1,6 +1,6 @@
 /**
  * ShopMate Storefront Application
- * Live Catalog Integration & Real-Time Client Interactivity
+ * Live Catalog Integration & PostgreSQL User Authentication
  */
 
 // Application State
@@ -9,7 +9,8 @@ const state = {
   filteredProducts: [],
   activeCategory: 'all',
   searchQuery: '',
-  cartCount: 0
+  cartCount: 0,
+  currentUser: null
 };
 
 // DOM Elements
@@ -19,6 +20,14 @@ const categoriesBar = document.getElementById('categories-bar');
 const productCountLabel = document.getElementById('product-count-label');
 const cartCountBadge = document.getElementById('cart-count');
 
+// Auth Modal Elements
+const authModal = document.getElementById('auth-modal');
+const openAuthBtn = document.getElementById('open-auth-btn');
+const closeAuthBtn = document.getElementById('close-auth-btn');
+const signupForm = document.getElementById('signup-form');
+const authFeedback = document.getElementById('auth-feedback');
+const signupSubmitBtn = document.getElementById('signup-submit-btn');
+
 /**
  * Fetch products from the microservice catalog endpoint
  * Gracefully falls back to direct live DummyJSON feed if accessed directly
@@ -27,13 +36,12 @@ async function fetchProductCatalog() {
   renderLoadingState();
 
   try {
-    // Try microservice endpoint first, fallback to direct DummyJSON API
     let response;
     try {
       response = await fetch('/api/v1/products');
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
     } catch {
-      response = await fetch('https://dummyjson.com/products?limit=30');
+      response = await fetch('https://dummyjson.com/products?limit=100');
     }
 
     const data = await response.json();
@@ -66,7 +74,6 @@ function setupCategoryFilters() {
     `;
   }).join('');
 
-  // Event delegation for category pill clicks
   categoriesBar.addEventListener('click', (e) => {
     const button = e.target.closest('.cat-pill');
     if (!button) return;
@@ -114,7 +121,7 @@ function renderProducts() {
     return;
   }
 
-  productCountLabel.textContent = `Showing ${state.filteredProducts.length} curated ${state.filteredProducts.length === 1 ? 'item' : 'items'}`;
+  productCountLabel.textContent = `Showing ${state.filteredProducts.length} curated marketplace items`;
 
   productsGrid.innerHTML = state.filteredProducts.map(product => {
     const formattedPrice = typeof product.price === 'number' 
@@ -154,7 +161,6 @@ window.addToCart = function(productId) {
   state.cartCount += 1;
   cartCountBadge.textContent = state.cartCount;
 
-  // Subtle button pulse animation
   cartCountBadge.style.transform = 'scale(1.25)';
   setTimeout(() => {
     cartCountBadge.style.transform = 'scale(1)';
@@ -170,7 +176,7 @@ function renderLoadingState() {
     <div class="state-container">
       <div class="state-icon">⏳</div>
       <h3 class="state-title">Loading Catalog</h3>
-      <p>Fetching the latest items from our microservices catalog...</p>
+      <p>Fetching 100+ marketplace items from live microservices feed...</p>
     </div>
   `;
 }
@@ -184,6 +190,87 @@ function renderErrorState(message) {
       <p>${message}</p>
     </div>
   `;
+}
+
+/**
+ * Modal Event Handlers
+ */
+if (openAuthBtn) {
+  openAuthBtn.addEventListener('click', () => {
+    authModal.style.display = 'flex';
+    authFeedback.style.display = 'none';
+  });
+}
+
+if (closeAuthBtn) {
+  closeAuthBtn.addEventListener('click', () => {
+    authModal.style.display = 'none';
+  });
+}
+
+if (authModal) {
+  authModal.addEventListener('click', (e) => {
+    if (e.target === authModal) {
+      authModal.style.display = 'none';
+    }
+  });
+}
+
+/**
+ * User Registration Form Submission (Connected to PostgreSQL)
+ */
+if (signupForm) {
+  signupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('user-name').value.trim();
+    const email = document.getElementById('user-email').value.trim();
+    const password = document.getElementById('user-password').value;
+
+    signupSubmitBtn.disabled = true;
+    signupSubmitBtn.textContent = 'Registering in PostgreSQL...';
+    authFeedback.style.display = 'none';
+
+    try {
+      const response = await fetch('/api/v1/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role: 'Customer' })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Registration failed');
+      }
+
+      // Success feedback
+      authFeedback.className = 'auth-feedback success';
+      authFeedback.innerHTML = `🎉 <strong>Success!</strong> Welcome, <strong>${name}</strong>! Your account is securely stored in PostgreSQL.`;
+      authFeedback.style.display = 'block';
+
+      // Update button in navbar to show user profile
+      const firstName = name.split(' ')[0];
+      openAuthBtn.innerHTML = `👤 ${firstName} ✓`;
+      openAuthBtn.style.backgroundColor = '#ecfdf5';
+      openAuthBtn.style.color = '#065f46';
+      openAuthBtn.style.borderColor = '#a7f3d0';
+
+      signupForm.reset();
+
+      // Automatically close modal after 1.8 seconds
+      setTimeout(() => {
+        authModal.style.display = 'none';
+      }, 1800);
+    } catch (err) {
+      authFeedback.className = 'auth-feedback error';
+      authFeedback.textContent = `⚠️ ${err.message}`;
+      authFeedback.style.display = 'block';
+    } finally {
+      signupSubmitBtn.disabled = false;
+      signupSubmitBtn.textContent = 'Create Account';
+    }
+  });
 }
 
 // Search input listener with real-time filtering
